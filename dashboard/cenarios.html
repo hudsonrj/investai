@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cenarios de Investimento — InvestAI</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="manifest" href="/dashboard/manifest.json">
+</head>
+<body>
+
+<!-- TICKER TAPE -->
+<div class="ticker-tape">
+  <div class="ticker-content" id="ticker-content">
+    <span class="ticker-item"><span class="t-symbol">Carregando...</span></span>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="main-header">
+  <div class="header-brand">
+    <div class="brand-logo">AI</div>
+    <div><div class="brand-name">InvestAI</div><div class="brand-tag">Finance Platform</div></div>
+  </div>
+  <nav class="header-nav">
+    <a href="/">Painel</a>
+    <a href="/cenarios.html" class="active">Cenarios</a>
+    <a href="/plano.html">Plano</a>
+    <a href="/noticias.html">Radar</a>
+    <a href="/smartmoney.html">Smart Money</a>
+  </nav>
+  <div class="header-right">
+    <div class="market-status-badge">
+      <span class="status-dot closed" id="market-status-dot"></span>
+      <span class="text-muted fs-11" id="market-status-text">B3 FECHADO</span>
+    </div>
+    <div class="header-clock">
+      <div class="clock-time" id="clock-time">--:--:--</div>
+      <div class="fs-11 text-muted" id="clock-date">--/--/----</div>
+    </div>
+    <button class="btn-logout-header" onclick="fazerLogout()">Sair</button>
+  </div>
+</header>
+
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Navegacao</div>
+      <a href="/" class="sidebar-nav-link"><span class="nav-icon">◉</span> Painel</a>
+      <a href="/cenarios.html" class="sidebar-nav-link active"><span class="nav-icon">◈</span> Cenarios</a>
+      <a href="/plano.html" class="sidebar-nav-link"><span class="nav-icon">◇</span> Plano de Acao</a>
+      <a href="/noticias.html" class="sidebar-nav-link"><span class="nav-icon">◎</span> Radar de Mercado</a>
+      <a href="/smartmoney.html" class="sidebar-nav-link"><span class="nav-icon">◆</span> Smart Money</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Cenario Ativo</div>
+      <div id="sidebar-cenario-info" class="text-secondary fs-12" style="padding:4px 6px;">
+        Selecione um cenario
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <div class="page-header mb-20">
+      <div class="page-title">Simulador de Cenarios</div>
+      <div class="page-subtitle">Comparativo de alocacao por perfil de investidor</div>
+    </div>
+
+    <!-- 4-column comparison table -->
+    <div class="cenarios-comparison mb-24" id="cenarios-comparison">
+
+      <!-- ATUAL -->
+      <div class="cenario-col" id="col-atual">
+        <div class="cenario-col-header" onclick="selecionarCenario('atual')">
+          <div class="cc-label">Situacao</div>
+          <div class="cc-name">Atual</div>
+          <div class="cc-risk low">Defensivo</div>
+        </div>
+        <div class="cenario-col-body">
+          <div class="cenario-alloc-bar">
+            <div class="cab-rf" style="width:88%"></div>
+            <div class="cab-fii" style="width:8%"></div>
+            <div class="cab-rv" style="width:4%"></div>
+          </div>
+          <div class="alloc-row"><span class="ar-name"><span class="ar-dot" style="background:#5b9cf6"></span>Renda Fixa</span><span class="ar-pct">88%</span></div>
+          <div class="alloc-row"><span class="ar-name"><span class="ar-dot" style="background:var(--gain)"></span>FIIs</span><span class="ar-pct">8%</span></div>
+          <div class="alloc-row"><span class="ar-name"><span class="ar-dot" style="background:#f59e0b"></span>Acoes</span><span class="ar-pct">4%</span></div>
+          <div class="cenario-result">
+            <div class="cr-label">Rentab. 1 ano</div>
+            <div class="cr-value">+10,8%</div>
+            <div class="cr-total">R$ 437.646</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONSERVADOR -->
+      <div class="cenario-col" id="col-conservador">
+        <div class="cenario-col-header" onclick="selecionarCenario('conservador')">
+          <div class="cc-label">Perfil</div>
+          <div class="cc-name">Conservador</div>
+          <div class="cc-risk low">Baixo risco</div>
+        </div>
+        <div class="cenario-col-body">
+          <div class="cenario-alloc-bar">
+            <div class="cab-rf" style="width:80%"></div>
+            <div class="cab-fii" style="width:10%"></div>
+            <div class="cab-rv" style="width:10%"></div>
+          </div>
+          <div class="alloc-row"><span class="ar-name"><span class="ar-dot" style="background:#5b9cf6"></span>Renda Fixa</span><span class="ar-pct">80%</span></div>
+          <div class="alloc-row"><span class="ar-name"><span class="ar-dot" style="background:var(--gain)"></span>FIIs</span><span class="ar-pct">10%</span></div>
+          <div class="alloc-row"><span class="ar-name"><span class="ar-dot" style="background:#f59e0b"></span>Acoes</span><span class="ar-pct">10%</span></div>
+          <div class="cenario-result">
+            <div class="cr-label">Rentab. 1 ano</div>
+            <div class="cr-value">+11,5%</div>
+            <div class="cr-total">R$ 440.418</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODERADO -->
+      <div class="cenario-col selected" id="col-moderado">
+        <div class="cenario-col-header" onclick="selecionarCenario('moderado')">
+          <div class="cc-label">Perfil</div>
+          <div class="cc-name">Moderado</div>
+          <div class="cc-risk medium">Risco medio</div>
+        </div>
+        <div class="cenario-col-body">
+          <div class="cenario-alloc-bar">
+            <div class="cab-rf" style="width:60%"></div>
+            <div class="cab-fii" style="width:15%"></div>
+            <div class="cab-rv" style="width:20%"></div>
+            <div class="cab-crypto" style="width:5%"></div>
+          </div>
+          <div class="alloc-row"><span class="ar-name"><span class="ar-dot" style="background:#5b9cf6"></span>Renda Fixa</span><span class="ar-pct">60%</span></div>
+          <div class="alloc-row"><span class="ar-name"><span class="ar-dot" style="background:var(--gain)"></span>FIIs</span><span class="ar-pct">15%</span></div>
+          <div class="alloc-row"><span class="ar-name"><span class="ar-dot" style="background:#f59e0b"></span>Acoes</span><span class="ar-pct">20%</span></div>
+          <div class="alloc-row"><span class="ar-name"><span class="ar-dot" style="background:#f472b6"></span>Cripto</span><span class="ar-pct">5%</span></div>
+          <div class="cenario-result">
+            <div class="cr-label">Rentab. 1 ano</div>
+            <div class="cr-value">+14,2%</div>
+            <div class="cr-total">R$ 451.121</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ARROJADO -->
+      <div class="cenario-col" id="col-arrojado">
+        <div class="cenario-col-header" onclick="selecionarCenario('arrojado')">
+          <div class="cc-label">Perfil</div>
+          <div class="cc-name">Arrojado</div>
+          <div class="cc-risk high">Alto risco</div>
+        </div>
+        <div class="cenario-col-body">
+          <div class="cenario-alloc-bar">
+            <div class="cab-rf" style="width:40%"></div>
+            <div class="cab-fii" style="width:20%"></div>
+            <div class="cab-rv" style="width:35%"></div>
+            <div class="cab-crypto" style="width:5%"></div>
+          </div>
+          <div class="alloc-row"><span class="ar-name"><span class="ar-dot" style="background:#5b9cf6"></span>Renda Fixa</span><span class="ar-pct">40%</span></div>
+          <div class="alloc-row"><span class="ar-name"><span class="ar-dot" style="background:var(--gain)"></span>FIIs</span><span class="ar-pct">20%</span></div>
+          <div class="alloc-row"><span class="ar-name"><span class="ar-dot" style="background:#f59e0b"></span>Acoes</span><span class="ar-pct">35%</span></div>
+          <div class="alloc-row"><span class="ar-name"><span class="ar-dot" style="background:#f472b6"></span>Cripto</span><span class="ar-pct">5%</span></div>
+          <div class="cenario-result">
+            <div class="cr-label">Rentab. 1 ano</div>
+            <div class="cr-value">+18,6%</div>
+            <div class="cr-total">R$ 468.541</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Transfer Recommendations -->
+    <div class="section-header mb-12">
+      <div class="section-title">Recomendacoes de Rebalanceamento</div>
+      <span class="section-badge" id="cenario-ativo-badge">Moderado</span>
+    </div>
+
+    <div id="recomendacoes-wrap" style="overflow-x:auto; margin-bottom:24px;">
+      <table class="transfer-table">
+        <thead><tr>
+          <th>ACAO</th>
+          <th>ATIVO / PRODUTO</th>
+          <th>VALOR</th>
+          <th>PRAZO</th>
+          <th>POR QUE</th>
+        </tr></thead>
+        <tbody id="transfer-tbody">
+          <!-- filled by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SELIC Simulator -->
+    <div class="selic-simulator">
+      <div class="section-header mb-4">
+        <div class="section-title">Simulador SELIC</div>
+        <span class="section-badge">E se a SELIC cair?</span>
+      </div>
+      <div class="page-subtitle mb-12">Ajuste a taxa e veja o impacto na renda mensal de cada cenario</div>
+
+      <div class="selic-inputs">
+        <div class="selic-input-group">
+          <label>Taxa SELIC</label>
+          <input type="range" id="selic-slider" min="8" max="15" step="0.25" value="14.65" oninput="updateSelic(this.value)">
+        </div>
+        <div>
+          <div class="text-muted fs-11 mb-4">Taxa atual</div>
+          <div class="selic-value-display"><span id="selic-display">14,65</span>%</div>
+        </div>
+        <div>
+          <div class="text-muted fs-11 mb-4">Capital simulado</div>
+          <div class="selic-value-display" style="color:var(--text-primary);">R$ 395.909</div>
+        </div>
+      </div>
+
+      <div class="selic-results-grid">
+        <div class="selic-result-card">
+          <div class="src-name">Atual</div>
+          <div class="src-value" id="res-atual">R$ 4.800/mes</div>
+          <div class="src-change text-muted" id="chg-atual">referencia</div>
+        </div>
+        <div class="selic-result-card">
+          <div class="src-name">Conservador</div>
+          <div class="src-value" id="res-conservador">R$ 5.200/mes</div>
+          <div class="src-change" id="chg-conservador"></div>
+        </div>
+        <div class="selic-result-card">
+          <div class="src-name">Moderado</div>
+          <div class="src-value" id="res-moderado">R$ 5.800/mes</div>
+          <div class="src-change" id="chg-moderado"></div>
+        </div>
+        <div class="selic-result-card">
+          <div class="src-name">Arrojado</div>
+          <div class="src-value" id="res-arrojado">R$ 6.400/mes</div>
+          <div class="src-change" id="chg-arrojado"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// Clock
+function startClock() {
+  const timeEl=document.getElementById('clock-time'); const dateEl=document.getElementById('clock-date');
+  const dot=document.getElementById('market-status-dot'); const txt=document.getElementById('market-status-text');
+  if (!timeEl) return;
+  function tick() {
+    const now=new Date();
+    timeEl.textContent=[now.getHours(),now.getMinutes(),now.getSeconds()].map(n=>String(n).padStart(2,'0')).join(':');
+    if(dateEl) dateEl.textContent=now.toLocaleDateString('pt-BR');
+    const brtH=(now.getUTCHours()-3+24)%24; const brtM=brtH*60+now.getUTCMinutes(); const day=now.getUTCDay();
+    const open=day>=1&&day<=5&&brtM>=600&&brtM<1075; const pre=day>=1&&day<=5&&brtM>=570&&brtM<600;
+    if(dot) dot.className='status-dot '+(open?'open':pre?'pre':'closed');
+    if(txt) txt.textContent=open?'B3 ABERTO':pre?'PRE-ABERTURA':'B3 FECHADO';
+  }
+  tick(); setInterval(tick,1000);
+}
+
+// Ticker
+async function loadTicker() {
+  try {
+    const res=await fetch('/api/exchanges/ticker-tape'); const items=await res.json();
+    if(!items||!items.length) return;
+    const build=i=>`<span class="ticker-item"><span class="t-symbol">${i.symbol}</span><span class="t-price">${i.price}</span><span class="t-change ${i.change>=0?'pos':'neg'}">${i.change>=0?'▲':'▼'} ${Math.abs(i.change).toFixed(2)}%</span></span>`;
+    const el=document.getElementById('ticker-content');
+    if(el){el.innerHTML=items.map(build).join('')+items.map(build).join(''); el.style.animation=`ticker-scroll ${Math.max(40,items.length*4)}s linear infinite`;}
+  } catch(e){}
+}
+
+// Transfer data per scenario
+const TRANSFERS = {
+  atual: [
+    { acao:'tirar',  ativo:'LCI BTG',              valor:'R$ 190.000', prazo:'Imediato',    motivo:'Concentracao excessiva (48%), baixa liquidez'},
+    { acao:'tirar',  ativo:'VGBL Brasilprev',       valor:'R$ 160.000', prazo:'3-6 meses',  motivo:'Rendimento inferior (12% a.a.)'},
+    { acao:'manter', ativo:'CDB XP',                valor:'R$ 35.000',  prazo:'—',           motivo:'Boa taxa 103% CDI, liquidez diaria'},
+    { acao:'manter', ativo:'ELET3',                 valor:'R$ 15.000',  prazo:'—',           motivo:'Dividendo robusto, setor regulado'},
+  ],
+  conservador: [
+    { acao:'tirar',  ativo:'LCI BTG (parcial)',     valor:'R$ 100.000', prazo:'1 mes',      motivo:'Reduzir de R$190k para R$90k'},
+    { acao:'tirar',  ativo:'VGBL (parcial)',         valor:'R$ 60.000',  prazo:'3 meses',    motivo:'Reduzir de R$160k para R$100k'},
+    { acao:'colocar',ativo:'Tesouro IPCA+ 2029',    valor:'R$ 80.000',  prazo:'1 semana',   motivo:'Protecao inflacao + 8,15% a.a.'},
+    { acao:'colocar',ativo:'FIIs (5-7 fundos)',     valor:'R$ 60.000',  prazo:'2 semanas',  motivo:'Dividendos mensais + liquidez'},
+    { acao:'colocar',ativo:'Acoes blue chips',      valor:'R$ 40.000',  prazo:'1 mes',      motivo:'PETR4, VALE3, BBAS3, ITUB4'},
+  ],
+  moderado: [
+    { acao:'tirar',  ativo:'LCI BTG (parcial)',     valor:'R$ 140.000', prazo:'1 semana',   motivo:'Reduzir concentracao, aumentar diversificacao'},
+    { acao:'tirar',  ativo:'VGBL (parcial)',         valor:'R$ 90.000',  prazo:'3 meses',    motivo:'Migrar para ativos de maior retorno'},
+    { acao:'colocar',ativo:'Tesouro IPCA+ 2029/35', valor:'R$ 70.000',  prazo:'10 dias',    motivo:'Hedge de inflacao'},
+    { acao:'colocar',ativo:'FIIs (8-10 fundos)',    valor:'R$ 100.000', prazo:'3 semanas',  motivo:'HGBS11, KNSC11, VISC11, MXRF11'},
+    { acao:'colocar',ativo:'Acoes (60% BC + 40% G)',valor:'R$ 60.000',  prazo:'1 mes',      motivo:'PETR4, WEGE3, PRIO3, RDOR3'},
+    { acao:'colocar',ativo:'Cripto (BTC/ETH)',      valor:'R$ 20.000',  prazo:'2 meses',    motivo:'Diversificacao e potencial de crescimento'},
+  ],
+  arrojado: [
+    { acao:'tirar',  ativo:'LCI BTG (parcial)',     valor:'R$ 170.000', prazo:'1 semana',   motivo:'Manter apenas reserva de R$20k'},
+    { acao:'tirar',  ativo:'VGBL (parcial)',         valor:'R$ 130.000', prazo:'3 meses',    motivo:'Manter apenas R$30k'},
+    { acao:'colocar',ativo:'Tesouro IPCA+',         valor:'R$ 50.000',  prazo:'10 dias',    motivo:'Protecao base'},
+    { acao:'colocar',ativo:'FIIs (10-12 fundos)',   valor:'R$ 120.000', prazo:'3 semanas',  motivo:'Alta diversificacao setorial'},
+    { acao:'colocar',ativo:'Acoes diversificadas',  valor:'R$ 120.000', prazo:'1 mes',      motivo:'40% BC + 40% Growth + 20% SmallCaps'},
+    { acao:'colocar',ativo:'ETFs Internacionais',   valor:'R$ 30.000',  prazo:'2 meses',    motivo:'SPY, IVV via BDRs ou Avenue'},
+    { acao:'urgente',ativo:'Definir broker',        valor:'—',           prazo:'Esta semana','motivo':'Abrir conta XP/Clear/BTG para operar B3'},
+  ],
+};
+
+let cenarioAtivo = 'moderado';
+
+function selecionarCenario(nome) {
+  cenarioAtivo = nome;
+  document.querySelectorAll('.cenario-col').forEach(c=>c.classList.remove('selected'));
+  const col = document.getElementById('col-'+nome);
+  if (col) col.classList.add('selected');
+
+  const badge = document.getElementById('cenario-ativo-badge');
+  const names  = { atual:'Atual', conservador:'Conservador', moderado:'Moderado', arrojado:'Arrojado' };
+  if (badge) badge.textContent = names[nome] || nome;
+
+  const sb = document.getElementById('sidebar-cenario-info');
+  if (sb) sb.textContent = names[nome] || nome;
+
+  // Render transfer table
+  const tbody = document.getElementById('transfer-tbody');
+  if (!tbody) return;
+  const data = TRANSFERS[nome] || [];
+  tbody.innerHTML = data.map(r => `
+    <tr>
+      <td><span class="transfer-tag ${r.acao}">${r.acao.toUpperCase()}</span></td>
+      <td class="fw-600">${r.ativo}</td>
+      <td class="tabular text-secondary">${r.valor}</td>
+      <td class="text-secondary fs-11">${r.prazo}</td>
+      <td class="text-secondary fs-11">${r.motivo}</td>
+    </tr>
+  `).join('');
+}
+
+// SELIC Calculator
+const BASE_SELIC = 14.65;
+const CAPITAL    = 395909;
+
+function calcRenda(selic) {
+  return {
+    atual:       CAPITAL * 0.88 * (selic/100/12) + CAPITAL * 0.12 * 0.008,
+    conservador: CAPITAL * 0.80 * (selic/100/12) + CAPITAL * 0.20 * 0.0085,
+    moderado:    CAPITAL * 0.60 * (selic/100/12) + CAPITAL * 0.40 * 0.009,
+    arrojado:    CAPITAL * 0.40 * (selic/100/12) + CAPITAL * 0.60 * 0.0095,
+  };
+}
+
+const baseRenda = calcRenda(BASE_SELIC);
+
+function updateSelic(val) {
+  const selic = parseFloat(val);
+  document.getElementById('selic-display').textContent = selic.toFixed(2).replace('.',',');
+
+  const renda = calcRenda(selic);
+  const ids = ['atual','conservador','moderado','arrojado'];
+  ids.forEach(id => {
+    const el  = document.getElementById('res-'+id);
+    const chg = document.getElementById('chg-'+id);
+    if (el) el.textContent = `R$ ${Math.round(renda[id]).toLocaleString('pt-BR')}/mes`;
+    if (chg && id !== 'atual') {
+      const diff = ((renda[id] - baseRenda[id]) / baseRenda[id] * 100).toFixed(1);
+      const cls  = diff >= 0 ? 'text-gain' : 'text-loss';
+      chg.innerHTML = `<span class="${cls}">${diff >= 0 ? '+' : ''}${diff}% vs. base</span>`;
+    }
+  });
+}
+
+function fazerLogout() {
+  fetch('/api/auth/logout',{method:'POST'}).finally(()=>{ document.cookie='token=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;'; window.location.href='/login.html'; });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  startClock();
+  loadTicker();
+  selecionarCenario('moderado');
+  updateSelic(14.65);
+  setInterval(loadTicker, 60000);
+});
+</script>
+<script src="/dashboard/auth-guard.js"></script>
+<script src="/dashboard/chat-widget.js"></script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Auth - InvestAI</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1a1a2e; color: #fff; }
+        .test { margin: 10px 0; padding: 10px; background: #16213e; border-radius: 5px; }
+        .success { color: #4ade80; }
+        .error { color: #f87171; }
+        button { padding: 10px 20px; margin: 10px 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🔧 InvestAI Auth Diagnostics</h1>
+    
+    <div class="test">
+        <h3>1. Test Login</h3>
+        <button onclick="testLogin()">Run Login Test</button>
+        <pre id="login-result"></pre>
+    </div>
+
+    <div class="test">
+        <h3>2. Test Auth Check</h3>
+        <button onclick="testAuthMe()">Check /api/auth/me</button>
+        <pre id="auth-result"></pre>
+    </div>
+
+    <div class="test">
+        <h3>3. Cookie Status</h3>
+        <button onclick="checkCookies()">Check Cookies</button>
+        <pre id="cookie-result"></pre>
+    </div>
+
+    <div class="test">
+        <h3>4. Full Flow Test</h3>
+        <button onclick="fullFlowTest()">Run Full Flow</button>
+        <pre id="flow-result"></pre>
+    </div>
+
+    <script>
+        async function testLogin() {
+            const result = document.getElementById('login-result');
+            result.textContent = 'Testing login...\n';
+            
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    credentials: 'include',
+                    body: JSON.stringify({username: 'hudson', password: 'hudson2026'})
+                });
+                
+                result.textContent += `Status: ${res.status}\n`;
+                result.textContent += `Headers:\n${Array.from(res.headers.entries()).map(([k,v]) => `  ${k}: ${v}`).join('\n')}\n`;
+                
+                const data = await res.json();
+                result.textContent += `Response: ${JSON.stringify(data, null, 2)}\n`;
+                
+                if (res.ok) {
+                    result.className = 'success';
+                    result.textContent += '\n✅ Login successful!';
+                } else {
+                    result.className = 'error';
+                    result.textContent += '\n❌ Login failed!';
+                }
+            } catch (e) {
+                result.className = 'error';
+                result.textContent += `\n❌ Error: ${e.message}`;
+            }
+        }
+
+        async function testAuthMe() {
+            const result = document.getElementById('auth-result');
+            result.textContent = 'Checking authentication...\n';
+            
+            try {
+                const res = await fetch('/api/auth/me', {
+                    credentials: 'include',
+                    cache: 'no-cache'
+                });
+                
+                result.textContent += `Status: ${res.status}\n`;
+                const data = await res.json();
+                result.textContent += `Response: ${JSON.stringify(data, null, 2)}\n`;
+                
+                if (res.ok && data.username) {
+                    result.className = 'success';
+                    result.textContent += `\n✅ Authenticated as: ${data.username}`;
+                } else {
+                    result.className = 'error';
+                    result.textContent += '\n❌ Not authenticated';
+                }
+            } catch (e) {
+                result.className = 'error';
+                result.textContent += `\n❌ Error: ${e.message}`;
+            }
+        }
+
+        function checkCookies() {
+            const result = document.getElementById('cookie-result');
+            result.textContent = 'Checking cookies...\n\n';
+            
+            result.textContent += `document.cookie: "${document.cookie}"\n\n`;
+            result.textContent += 'Note: HttpOnly cookies (like investai_token) are NOT visible to JavaScript.\n';
+            result.textContent += 'This is NORMAL and secure behavior.\n\n';
+            
+            if (document.cookie.includes('investai_token')) {
+                result.className = 'error';
+                result.textContent += '❌ ERROR: investai_token should NOT be visible here (it should be HttpOnly)';
+            } else {
+                result.className = 'success';
+                result.textContent += '✅ Good: Cookie is HttpOnly (not visible to JS)';
+            }
+        }
+
+        async function fullFlowTest() {
+            const result = document.getElementById('flow-result');
+            result.textContent = '🧪 Starting full flow test...\n\n';
+            
+            // Step 1: Login
+            result.textContent += '1️⃣ Logging in...\n';
+            try {
+                const loginRes = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    credentials: 'include',
+                    body: JSON.stringify({username: 'hudson', password: 'hudson2026'})
+                });
+                
+                const loginData = await loginRes.json();
+                result.textContent += `   Status: ${loginRes.status}\n`;
+                result.textContent += `   Response: ${JSON.stringify(loginData)}\n`;
+                
+                if (!loginRes.ok) {
+                    result.className = 'error';
+                    result.textContent += '\n❌ Login failed at step 1';
+                    return;
+                }
+                
+                result.textContent += '   ✅ Login successful\n\n';
+                
+                // Step 2: Wait 500ms (simulating redirect delay)
+                result.textContent += '2️⃣ Waiting 500ms (simulating redirect)...\n';
+                await new Promise(resolve => setTimeout(resolve, 500));
+                result.textContent += '   ✅ Wait complete\n\n';
+                
+                // Step 3: Check auth
+                result.textContent += '3️⃣ Checking authentication...\n';
+                const authRes = await fetch('/api/auth/me', {
+                    credentials: 'include',
+                    cache: 'no-cache'
+                });
+                
+                result.textContent += `   Status: ${authRes.status}\n`;
+                const authData = await authRes.json();
+                result.textContent += `   Response: ${JSON.stringify(authData)}\n`;
+                
+                if (authRes.ok && authData.username) {
+                    result.className = 'success';
+                    result.textContent += `\n✅✅✅ FULL FLOW SUCCESS! Authenticated as: ${authData.username}\n`;
+                    result.textContent += '\n🎯 The auth flow is working correctly!\n';
+                    result.textContent += 'The problem must be in auth-guard.js or page redirect logic.';
+                } else {
+                    result.className = 'error';
+                    result.textContent += '\n❌ Auth check failed at step 3';
+                    result.textContent += '\n🔍 Cookie was not sent or not valid';
+                }
+                
+            } catch (e) {
+                result.className = 'error';
+                result.textContent += `\n❌ Error during flow test: ${e.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

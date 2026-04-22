@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plano de Acao — InvestAI</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="manifest" href="/dashboard/manifest.json">
+</head>
+<body>
+
+<div class="ticker-tape">
+  <div class="ticker-content" id="ticker-content">
+    <span class="ticker-item"><span class="t-symbol">Carregando...</span></span>
+  </div>
+</div>
+
+<header class="main-header">
+  <div class="header-brand">
+    <div class="brand-logo">AI</div>
+    <div><div class="brand-name">InvestAI</div><div class="brand-tag">Finance Platform</div></div>
+  </div>
+  <nav class="header-nav">
+    <a href="/">Painel</a>
+    <a href="/cenarios.html">Cenarios</a>
+    <a href="/plano.html" class="active">Plano</a>
+    <a href="/noticias.html">Radar</a>
+    <a href="/smartmoney.html">Smart Money</a>
+  </nav>
+  <div class="header-right">
+    <div class="market-status-badge">
+      <span class="status-dot closed" id="market-status-dot"></span>
+      <span class="text-muted fs-11" id="market-status-text">B3 FECHADO</span>
+    </div>
+    <div class="header-clock">
+      <div class="clock-time" id="clock-time">--:--:--</div>
+      <div class="fs-11 text-muted" id="clock-date">--/--/----</div>
+    </div>
+    <button class="btn-logout-header" onclick="fazerLogout()">Sair</button>
+  </div>
+</header>
+
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Navegacao</div>
+      <a href="/" class="sidebar-nav-link"><span class="nav-icon">◉</span> Painel</a>
+      <a href="/cenarios.html" class="sidebar-nav-link"><span class="nav-icon">◈</span> Cenarios</a>
+      <a href="/plano.html" class="sidebar-nav-link active"><span class="nav-icon">◇</span> Plano de Acao</a>
+      <a href="/noticias.html" class="sidebar-nav-link"><span class="nav-icon">◎</span> Radar de Mercado</a>
+      <a href="/smartmoney.html" class="sidebar-nav-link"><span class="nav-icon">◆</span> Smart Money</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Progresso</div>
+      <div id="sidebar-progress" class="text-secondary fs-12" style="padding:4px 6px;">
+        Selecione um perfil
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <div class="page-header mb-20">
+      <div class="page-title">Plano de Acao</div>
+      <div class="page-subtitle">Guia passo a passo para executar seu cenario ideal</div>
+    </div>
+
+    <!-- 5-Step Stepper -->
+    <div class="stepper mb-24">
+      <div class="step-item">
+        <div class="step-circle done">✓</div>
+        <div class="step-info">
+          <div class="step-label">Etapa 1</div>
+          <div class="step-sublabel">Perfil</div>
+        </div>
+      </div>
+      <div class="step-connector done"></div>
+      <div class="step-item">
+        <div class="step-circle active">2</div>
+        <div class="step-info">
+          <div class="step-label">Etapa 2</div>
+          <div class="step-sublabel">Objetivos</div>
+        </div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-item">
+        <div class="step-circle">3</div>
+        <div class="step-info">
+          <div class="step-label">Etapa 3</div>
+          <div class="step-sublabel">Horizonte</div>
+        </div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-item">
+        <div class="step-circle">4</div>
+        <div class="step-info">
+          <div class="step-label">Etapa 4</div>
+          <div class="step-sublabel">Alocacao</div>
+        </div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-item">
+        <div class="step-circle">5</div>
+        <div class="step-info">
+          <div class="step-label">Etapa 5</div>
+          <div class="step-sublabel">Revisao</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Selector -->
+    <div class="section-header mb-8">
+      <div class="section-title">Escolha seu perfil</div>
+    </div>
+    <div class="profile-btns mb-24">
+      <button class="btn-profile" onclick="selecionarPerfil('conservador',this)" data-perfil="conservador">
+        <span class="bp-title">Conservador</span>
+        <span class="bp-sub text-muted">80% RF | 10% FII | 10% RV</span>
+      </button>
+      <button class="btn-profile active" onclick="selecionarPerfil('moderado',this)" data-perfil="moderado">
+        <span class="bp-title">Moderado</span>
+        <span class="bp-sub">60% RF | 15% FII | 20% RV | 5% Cripto</span>
+      </button>
+      <button class="btn-profile" onclick="selecionarPerfil('arrojado',this)" data-perfil="arrojado">
+        <span class="bp-title">Arrojado</span>
+        <span class="bp-sub text-muted">40% RF | 20% FII | 35% RV | 5% Cripto</span>
+      </button>
+    </div>
+
+    <!-- Guides Accordion -->
+    <div class="section-header mb-12">
+      <div class="section-title">Guias de Investimento</div>
+    </div>
+    <div class="accordion mb-24">
+
+      <div class="accordion-item" id="acc-tesouro">
+        <div class="accordion-header" onclick="toggleAccordion('tesouro')">
+          <div class="accordion-title">Tesouro Direto</div>
+          <span class="accordion-icon">▼</span>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-inner">
+            <div class="guide-step">
+              <div class="guide-step-num">1</div>
+              <div class="guide-step-content"><strong>Acesse o site oficial</strong><p>Entre em <a href="https://www.tesourodireto.com.br" target="_blank">www.tesourodireto.com.br</a> ou pelo app da sua corretora</p></div>
+            </div>
+            <div class="guide-step">
+              <div class="guide-step-num">2</div>
+              <div class="guide-step-content"><strong>Faca login</strong><p>Use CPF e senha da sua corretora (XP, BTG, Clear, Rico)</p></div>
+            </div>
+            <div class="guide-step">
+              <div class="guide-step-num">3</div>
+              <div class="guide-step-content"><strong>Escolha o titulo</strong><p>Recomendado: <strong class="text-accent">Tesouro IPCA+ 2029</strong> — protecao inflacao + 8,15% a.a.</p></div>
+            </div>
+            <div class="guide-step">
+              <div class="guide-step-num">4</div>
+              <div class="guide-step-content"><strong>Defina o valor</strong><p>Minimo: R$ 30,00 | Para o plano moderado: R$ 70.000</p></div>
+            </div>
+            <div class="guide-step">
+              <div class="guide-step-num">5</div>
+              <div class="guide-step-content"><strong>Confirme a compra</strong><p>Revise os dados. O dinheiro e debitado na hora.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item" id="acc-fiis">
+        <div class="accordion-header" onclick="toggleAccordion('fiis')">
+          <div class="accordion-title">Fundos Imobiliarios (FIIs)</div>
+          <span class="accordion-icon">▼</span>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-inner">
+            <div class="guide-step">
+              <div class="guide-step-num">1</div>
+              <div class="guide-step-content"><strong>Abra o home broker</strong><p>XP, Clear, Rico, BTG ou Inter. Acesse a aba de Renda Variavel.</p></div>
+            </div>
+            <div class="guide-step">
+              <div class="guide-step-num">2</div>
+              <div class="guide-step-content"><strong>Pesquise os FIIs recomendados</strong><p>HGBS11 (shoppings), KNSC11 (CRI/CRA), VISC11 (varejo), MXRF11 (papel), PVBI11 (lajes)</p></div>
+            </div>
+            <div class="guide-step">
+              <div class="guide-step-num">3</div>
+              <div class="guide-step-content"><strong>Diversifique por segmento</strong><p>Compre 5-8 FIIs diferentes — R$ 10k-15k em cada</p></div>
+            </div>
+            <div class="guide-step">
+              <div class="guide-step-num">4</div>
+              <div class="guide-step-content"><strong>Verifique o DY</strong><p>Dividend Yield ideal: 8-12% ao ano. Evite fundos com DY &gt; 15% sem analise.</p></div>
+            </div>
+            <div class="guide-step">
+              <div class="guide-step-num">5</div>
+              <div class="guide-step-content"><strong>Receba mensalmente</strong><p>Os dividendos caem na sua conta corretora todo mes, sem IR.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item" id="acc-acoes">
+        <div class="accordion-header" onclick="toggleAccordion('acoes')">
+          <div class="accordion-title">Acoes (B3)</div>
+          <span class="accordion-icon">▼</span>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-inner">
+            <div class="guide-step">
+              <div class="guide-step-num">1</div>
+              <div class="guide-step-content"><strong>Blue Chips (60% da carteira de RV)</strong><p>PETR4, VALE3, BBAS3, ITUB4, WEGE3 — base solida com dividendos</p></div>
+            </div>
+            <div class="guide-step">
+              <div class="guide-step-num">2</div>
+              <div class="guide-step-content"><strong>Growth (30%)</strong><p>LWSA3, PRIO3, RDOR3, SUZB3 — crescimento de receita acima da media</p></div>
+            </div>
+            <div class="guide-step">
+              <div class="guide-step-num">3</div>
+              <div class="guide-step-content"><strong>Small Caps (10%)</strong><p>TEND3, CMIN3 — maior volatilidade, maior potencial</p></div>
+            </div>
+            <div class="guide-step">
+              <div class="guide-step-num">4</div>
+              <div class="guide-step-content"><strong>Defina entrada e stop</strong><p>Use a Watchlist no Painel para acompanhar precos ideais de entrada</p></div>
+            </div>
+            <div class="guide-step">
+              <div class="guide-step-num">5</div>
+              <div class="guide-step-content"><strong>Rebalanceie trimestralmente</strong><p>A cada 3 meses, revise os pesos e ajuste conforme o mercado</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item" id="acc-cripto">
+        <div class="accordion-header" onclick="toggleAccordion('cripto')">
+          <div class="accordion-title">Criptomoedas (opcional — perfil moderado/arrojado)</div>
+          <span class="accordion-icon">▼</span>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-inner">
+            <div class="guide-step">
+              <div class="guide-step-num">1</div>
+              <div class="guide-step-content"><strong>Limite a exposicao</strong><p>Maximo 5% da carteira total. Cripto e altamente volatil.</p></div>
+            </div>
+            <div class="guide-step">
+              <div class="guide-step-num">2</div>
+              <div class="guide-step-content"><strong>Concentre em BTC e ETH</strong><p>70% BTC + 30% ETH. Evite altcoins sem fundamentos.</p></div>
+            </div>
+            <div class="guide-step">
+              <div class="guide-step-num">3</div>
+              <div class="guide-step-content"><strong>Use Binance ou Mercado Bitcoin</strong><p>Exchanges regulamentadas com liquidez para o mercado brasileiro</p></div>
+            </div>
+            <div class="guide-step">
+              <div class="guide-step-num">4</div>
+              <div class="guide-step-content"><strong>Estrategia DCA</strong><p>Compre mensalmente valor fixo — suaviza o ponto de entrada</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Execution Checklist -->
+    <div class="section-header mb-12">
+      <div class="section-title">Checklist de Execucao</div>
+      <span class="section-badge" id="checklist-progress">0/0 concluido</span>
+    </div>
+    <div id="checklist-container" class="mb-24"></div>
+
+    <!-- SELIC Simulator -->
+    <div class="selic-simulator mb-24">
+      <div class="section-header mb-4">
+        <div class="section-title">Simulador SELIC</div>
+        <span class="section-badge">Impacto na renda mensal</span>
+      </div>
+      <div class="page-subtitle mb-16">Ajuste a taxa SELIC e veja a renda mensal estimada por cenario</div>
+
+      <div class="selic-inputs">
+        <div class="selic-input-group">
+          <label>Taxa SELIC</label>
+          <input type="range" id="selic-slider" min="8" max="15" step="0.25" value="14.65" oninput="updateSelic(this.value)">
+        </div>
+        <div>
+          <div class="text-muted fs-11 mb-4">Taxa selecionada</div>
+          <div class="selic-value-display"><span id="selic-display">14,65</span>%</div>
+        </div>
+      </div>
+
+      <div class="selic-results-grid">
+        <div class="selic-result-card">
+          <div class="src-name">Conservador</div>
+          <div class="src-value" id="res-conservador">R$ 5.200/mes</div>
+        </div>
+        <div class="selic-result-card">
+          <div class="src-name">Moderado</div>
+          <div class="src-value" id="res-moderado">R$ 5.800/mes</div>
+        </div>
+        <div class="selic-result-card">
+          <div class="src-name">Arrojado</div>
+          <div class="src-value" id="res-arrojado">R$ 6.400/mes</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+function startClock() {
+  const timeEl=document.getElementById('clock-time'); const dateEl=document.getElementById('clock-date');
+  const dot=document.getElementById('market-status-dot'); const txt=document.getElementById('market-status-text');
+  if(!timeEl) return;
+  function tick(){
+    const now=new Date();
+    timeEl.textContent=[now.getHours(),now.getMinutes(),now.getSeconds()].map(n=>String(n).padStart(2,'0')).join(':');
+    if(dateEl) dateEl.textContent=now.toLocaleDateString('pt-BR');
+    const brtH=(now.getUTCHours()-3+24)%24; const brtM=brtH*60+now.getUTCMinutes(); const day=now.getUTCDay();
+    const open=day>=1&&day<=5&&brtM>=600&&brtM<1075; const pre=day>=1&&day<=5&&brtM>=570&&brtM<600;
+    if(dot) dot.className='status-dot '+(open?'open':pre?'pre':'closed');
+    if(txt) txt.textContent=open?'B3 ABERTO':pre?'PRE-ABERTURA':'B3 FECHADO';
+  }
+  tick(); setInterval(tick,1000);
+}
+
+async function loadTicker() {
+  try {
+    const res=await fetch('/api/exchanges/ticker-tape'); const items=await res.json();
+    if(!items||!items.length) return;
+    const build=i=>`<span class="ticker-item"><span class="t-symbol">${i.symbol}</span><span class="t-price">${i.price}</span><span class="t-change ${i.change>=0?'pos':'neg'}">${i.change>=0?'▲':'▼'} ${Math.abs(i.change).toFixed(2)}%</span></span>`;
+    const el=document.getElementById('ticker-content');
+    if(el){el.innerHTML=items.map(build).join('')+items.map(build).join(''); el.style.animation=`ticker-scroll ${Math.max(40,items.length*4)}s linear infinite`;}
+  }catch(e){}
+}
+
+function toggleAccordion(name) {
+  const item=document.getElementById('acc-'+name);
+  if(!item) return;
+  const wasOpen=item.classList.contains('open');
+  document.querySelectorAll('.accordion-item').forEach(i=>i.classList.remove('open'));
+  if(!wasOpen) item.classList.add('open');
+}
+
+const CHECKLISTS = {
+  conservador: ['Resgatar R$ 100k da LCI BTG','Resgatar R$ 60k do VGBL','Aplicar R$ 80k no Tesouro IPCA+','Comprar R$ 60k em FIIs (5-7 fundos)','Comprar R$ 40k em acoes blue chips'],
+  moderado:    ['Resgatar R$ 140k da LCI BTG','Resgatar R$ 90k do VGBL','Aplicar R$ 70k no Tesouro IPCA+','Comprar R$ 100k em FIIs (8-10 fundos)','Comprar R$ 60k em acoes (60% BC, 40% Growth)','Comprar R$ 20k em BTC/ETH'],
+  arrojado:    ['Resgatar R$ 170k da LCI BTG','Resgatar R$ 130k do VGBL','Aplicar R$ 50k no Tesouro IPCA+','Comprar R$ 120k em FIIs (10-12 fundos)','Comprar R$ 120k em acoes diversificadas','Comprar R$ 30k em ETFs internacionais'],
+};
+
+let perfilAtivo = 'moderado';
+
+function selecionarPerfil(nome, btn) {
+  perfilAtivo = nome;
+  document.querySelectorAll('.btn-profile').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  carregarChecklist(nome);
+  const sb=document.getElementById('sidebar-progress');
+  const names={conservador:'Conservador',moderado:'Moderado',arrojado:'Arrojado'};
+  if(sb) sb.textContent='Perfil: '+names[nome];
+}
+
+function carregarChecklist(perfil) {
+  const container=document.getElementById('checklist-container');
+  const progress=document.getElementById('checklist-progress');
+  if(!container) return;
+  const items=CHECKLISTS[perfil]||CHECKLISTS.moderado;
+  const saved=JSON.parse(localStorage.getItem('checklist-'+perfil)||'{}');
+  const done=Object.values(saved).filter(Boolean).length;
+  if(progress) progress.textContent=`${done}/${items.length} concluido`;
+  container.innerHTML=items.map((item,idx)=>`
+    <div class="checklist-item">
+      <input type="checkbox" id="ck-${idx}" ${saved[idx]?'checked':''} onchange="salvarCheck('${perfil}',${idx},this.checked)">
+      <label for="ck-${idx}">${item}</label>
+    </div>`).join('');
+}
+
+function salvarCheck(perfil, idx, checked) {
+  const saved=JSON.parse(localStorage.getItem('checklist-'+perfil)||'{}');
+  saved[idx]=checked;
+  localStorage.setItem('checklist-'+perfil,JSON.stringify(saved));
+  const items=CHECKLISTS[perfil]||[];
+  const done=Object.values(saved).filter(Boolean).length;
+  const progress=document.getElementById('checklist-progress');
+  if(progress) progress.textContent=`${done}/${items.length} concluido`;
+}
+
+function updateSelic(val) {
+  const selic=parseFloat(val);
+  document.getElementById('selic-display').textContent=selic.toFixed(2).replace('.',',');
+  const C=395909;
+  const rC=C*0.80*(selic/100/12)+C*0.20*0.0085;
+  const rM=C*0.60*(selic/100/12)+C*0.40*0.009;
+  const rA=C*0.40*(selic/100/12)+C*0.60*0.0095;
+  document.getElementById('res-conservador').textContent=`R$ ${Math.round(rC).toLocaleString('pt-BR')}/mes`;
+  document.getElementById('res-moderado').textContent=`R$ ${Math.round(rM).toLocaleString('pt-BR')}/mes`;
+  document.getElementById('res-arrojado').textContent=`R$ ${Math.round(rA).toLocaleString('pt-BR')}/mes`;
+}
+
+function fazerLogout() {
+  fetch('/api/auth/logout',{method:'POST'}).finally(()=>{ document.cookie='token=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;'; window.location.href='/login.html'; });
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  startClock(); loadTicker();
+  const urlParams=new URLSearchParams(window.location.search);
+  const perfil=urlParams.get('cenario')||'moderado';
+  selecionarPerfil(perfil, document.querySelector(`[data-perfil="${perfil}"]`));
+  updateSelic(14.65);
+  setInterval(loadTicker, 60000);
+});
+</script>
+<script src="/dashboard/auth-guard.js"></script>
+<script src="/dashboard/chat-widget.js"></script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - InvestAI</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="login-container">
+        <h1>🚀 InvestAI</h1>
+        <form id="login-form">
+            <input type="text" id="username" placeholder="Usuário" value="hudson" required>
+            <input type="password" id="password" placeholder="Senha" value="hudson2026" required>
+            <button type="submit">Entrar</button>
+        </form>
+        <div id="error" style="color: red; margin-top: 10px;"></div>
+    </div>
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const errorDiv = document.getElementById('error');
+            
+            btn.textContent = 'Entrando...';
+            btn.disabled = true;
+            errorDiv.textContent = '';
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        username: document.getElementById('username').value,
+                        password: document.getElementById('password').value
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.status === 'success') {
+                    // Login OK - salva no localStorage como fallback
+                    localStorage.setItem('investai_user', data.user);
+                    
+                    // Redireciona imediatamente
+                    window.location.replace('/');
+                } else {
+                    errorDiv.textContent = 'Login inválido: ' + (data.message || 'Erro desconhecido');
+                    btn.textContent = 'Entrar';
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                errorDiv.textContent = 'Erro ao fazer login: ' + err.message;
+                btn.textContent = 'Entrar';
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

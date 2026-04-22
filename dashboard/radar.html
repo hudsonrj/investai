@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Análises de Mercado - InvestAI</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 InvestAI</h1>
+            <nav>
+                <a href="/">Meu Portfolio</a>
+                <a href="/cenarios.html">Cenários</a>
+                <a href="/plano.html">Plano de Ação</a>
+                <a href="/radar.html" class="active">Análises de Mercado</a>
+                <a href="/smartmoney.html">Oportunidades</a>
+            </nav>
+        </header>
+        <main>
+            <h2>Radar de Mercado</h2>
+            <div id="radar-content"></div>
+        </main>
+    </div>
+    <script>
+        fetch('/api/radar/mercados')
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('radar-content').innerHTML = data.map(m => 
+                `<div class="card"><h3>${m.nome}</h3><p>Valor: ${m.valor}</p><p>Variação: ${m.variacao}%</p></div>`
+            ).join('');
+        });
+    </script>
+</body>
+</html>

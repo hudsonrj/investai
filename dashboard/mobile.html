@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>InvestAI Mobile</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="manifest" href="/dashboard/manifest.json">
+    <style>
+        /* Mobile-specific styles */
+        body { padding-bottom: 80px; }
+        .container { padding: 10px; }
+        header { padding: 15px; margin-bottom: 15px; }
+        .card { padding: 15px; margin-bottom: 15px; }
+        
+        /* Bottom nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(0, 212, 255, 0.2);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #94a3b8;
+            text-decoration: none;
+            padding: 8px;
+            transition: color 0.2s;
+        }
+        
+        .nav-item.active {
+            color: #00d4ff;
+        }
+        
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+        
+        .nav-label {
+            font-size: 11px;
+        }
+        
+        /* Swipe gestures */
+        .tab-content {
+            min-height: calc(100vh - 200px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 InvestAI</h1>
+        </header>
+
+        <main>
+            <!-- TAB PORTFOLIO -->
+            <div id="mobile-portfolio" class="tab-content">
+                <div id="portfolio-mobile-list"></div>
+            </div>
+
+            <!-- TAB WATCHLIST -->
+            <div id="mobile-watchlist" class="tab-content" style="display:none">
+                <h2>👁️ Watchlist</h2>
+                <div id="watchlist-mobile-list"></div>
+            </div>
+
+            <!-- TAB CENÁRIOS -->
+            <div id="mobile-cenarios" class="tab-content" style="display:none">
+                <h2>📊 Cenários</h2>
+                <div id="cenarios-mobile-list"></div>
+            </div>
+
+            <!-- TAB RADAR -->
+            <div id="mobile-radar" class="tab-content" style="display:none">
+                <h2>📡 Radar</h2>
+                <div id="radar-mobile-list"></div>
+            </div>
+
+            <!-- TAB MAIS -->
+            <div id="mobile-mais" class="tab-content" style="display:none">
+                <h2>⚙️ Mais</h2>
+                <div class="action-list">
+                    <div class="action-item" onclick="window.location.href='/plano.html'">
+                        <strong>📋 Plano de Ação</strong>
+                        <p>Guia passo a passo</p>
+                    </div>
+                    <div class="action-item" onclick="window.location.href='/smartmoney.html'">
+                        <strong>👁️ Smart Money</strong>
+                        <p>Movimentos institucionais</p>
+                    </div>
+                    <div class="action-item" onclick="fazerLogout()">
+                        <strong>🚪 Sair</strong>
+                        <p>Encerrar sessão</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- BOTTOM NAV -->
+        <nav class="bottom-nav">
+            <a href="#" class="nav-item active" onclick="showMobileTab('portfolio', event)">
+                <div class="nav-icon">💰</div>
+                <div class="nav-label">Portfolio</div>
+            </a>
+            <a href="#" class="nav-item" onclick="showMobileTab('watchlist', event)">
+                <div class="nav-icon">👁️</div>
+                <div class="nav-label">Watchlist</div>
+            </a>
+            <a href="#" class="nav-item" onclick="showMobileTab('cenarios', event)">
+                <div class="nav-icon">📊</div>
+                <div class="nav-label">Cenários</div>
+            </a>
+            <a href="#" class="nav-item" onclick="showMobileTab('radar', event)">
+                <div class="nav-icon">📡</div>
+                <div class="nav-label">Radar</div>
+            </a>
+            <a href="#" class="nav-item" onclick="showMobileTab('mais', event)">
+                <div class="nav-icon">⚙️</div>
+                <div class="nav-label">Mais</div>
+            </a>
+        </nav>
+    </div>
+
+    <script>
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const tabs = ['portfolio', 'watchlist', 'cenarios', 'radar', 'mais'];
+        let currentTabIndex = 0;
+
+        function showMobileTab(tabName, event) {
+            if (event) {
+                event.preventDefault();
+            }
+
+            // Oculta todos
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+            // Mostra o selecionado
+            document.getElementById('mobile-' + tabName).style.display = 'block';
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
+            }
+
+            currentTabIndex = tabs.indexOf(tabName);
+
+            // Carrega dados
+            if (tabName === 'portfolio') loadPortfolioMobile();
+            if (tabName === 'watchlist') loadWatchlistMobile();
+            if (tabName === 'cenarios') loadCenariosMobile();
+            if (tabName === 'radar') loadRadarMobile();
+        }
+
+        async function loadPortfolioMobile() {
+            try {
+                const res = await fetch('/api/portfolio/');
+                const data = await res.json();
+                document.getElementById('portfolio-mobile-list').innerHTML = `
+                    <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <h3>💰 Total Geral</h3>
+                        <p style="font-size: 2em; font-weight: bold;">R$ ${data.total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+                    </div>
+                    ${data.items.map(item => `
+                        <div class="card">
+                            <h3>${item.produto}</h3>
+                            <p><strong>R$ ${parseFloat(item.valor_atual).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong></p>
+                            <p style="font-size: 0.9em; color: #94a3b8;">${item.tipo} - ${item.instituicao}</p>
+                        </div>
+                    `).join('')}
+                `;
+            } catch (e) {
+                console.error('Erro:', e);
+            }
+        }
+
+        async function loadWatchlistMobile() {
+            try {
+                const res = await fetch('/api/portfolio/watchlist');
+                const data = await res.json();
+                document.getElementById('watchlist-mobile-list').innerHTML = data.map(item => `
+                    <div class="card">
+                        <h3>${item.ticker} - ${item.nome}</h3>
+                        <p>Entrada: R$ ${item.entrada ? item.entrada.toFixed(2) : '-'}</p>
+                        <p style="color: #10b981;">Alvo: R$ ${item.alvo ? item.alvo.toFixed(2) : '-'}</p>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error('Erro:', e);
+            }
+        }
+
+        async function loadCenariosMobile() {
+            try {
+                const res = await fetch('/api/cenarios/');
+                const data = await res.json();
+                document.getElementById('cenarios-mobile-list').innerHTML = data.map(c => `
+                    <div class="card" onclick="window.location.href='/cenarios.html?cenario=${c.nome}'">
+                        <h3>${c.nome}</h3>
+                        <p>${c.descricao || c.perfil}</p>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error('Erro:', e);
+            }
+        }
+
+        async function loadRadarMobile() {
+            try {
+                const res = await fetch('/api/radar/mercados');
+                const data = await res.json();
+                document.getElementById('radar-mobile-list').innerHTML = data.slice(0, 5).map(m => `
+                    <div class="card">
+                        <h3>${m.nome}</h3>
+                        <p style="font-size: 1.5em; font-weight: bold;">${m.valor}</p>
+                        <p class="${m.variacao >= 0 ? 'positiva' : 'negativa'}">
+                            ${m.variacao >= 0 ? '▲' : '▼'} ${Math.abs(m.variacao).toFixed(2)}%
+                        </p>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error('Erro:', e);
+            }
+        }
+
+        function fazerLogout() {
+            fetch('/api/auth/logout', { method: 'POST' })
+                .then(() => {
+                    window.location.href = '/login.html';
+                });
+        }
+
+        // Swipe gestures
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0 && currentTabIndex < tabs.length - 1) {
+                    // Swipe left - próxima tab
+                    showMobileTab(tabs[currentTabIndex + 1], null);
+                    document.querySelectorAll('.nav-item')[currentTabIndex].classList.add('active');
+                } else if (diff < 0 && currentTabIndex > 0) {
+                    // Swipe right - tab anterior
+                    showMobileTab(tabs[currentTabIndex - 1], null);
+                    document.querySelectorAll('.nav-item')[currentTabIndex].classList.add('active');
+                }
+            }
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPortfolioMobile();
+        });
+    </script>
+    <script src="/dashboard/auth-guard.js"></script>
+    <script src="/dashboard/chat-widget.js"></script>
+</body>
+</html>

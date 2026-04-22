@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Money — InvestAI</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="manifest" href="/dashboard/manifest.json">
+</head>
+<body>
+
+<div class="ticker-tape">
+  <div class="ticker-content" id="ticker-content">
+    <span class="ticker-item"><span class="t-symbol">Carregando...</span></span>
+  </div>
+</div>
+
+<header class="main-header">
+  <div class="header-brand">
+    <div class="brand-logo">AI</div>
+    <div><div class="brand-name">InvestAI</div><div class="brand-tag">Finance Platform</div></div>
+  </div>
+  <nav class="header-nav">
+    <a href="/">Painel</a>
+    <a href="/cenarios.html">Cenarios</a>
+    <a href="/plano.html">Plano</a>
+    <a href="/noticias.html">Radar</a>
+    <a href="/smartmoney.html" class="active">Smart Money</a>
+  </nav>
+  <div class="header-right">
+    <div class="market-status-badge">
+      <span class="status-dot closed" id="market-status-dot"></span>
+      <span class="text-muted fs-11" id="market-status-text">B3 FECHADO</span>
+    </div>
+    <div class="header-clock">
+      <div class="clock-time" id="clock-time">--:--:--</div>
+      <div class="fs-11 text-muted" id="clock-date">--/--/----</div>
+    </div>
+    <button class="btn-logout-header" onclick="fazerLogout()">Sair</button>
+  </div>
+</header>
+
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Navegacao</div>
+      <a href="/" class="sidebar-nav-link"><span class="nav-icon">◉</span> Painel</a>
+      <a href="/cenarios.html" class="sidebar-nav-link"><span class="nav-icon">◈</span> Cenarios</a>
+      <a href="/plano.html" class="sidebar-nav-link"><span class="nav-icon">◇</span> Plano de Acao</a>
+      <a href="/noticias.html" class="sidebar-nav-link"><span class="nav-icon">◎</span> Radar de Mercado</a>
+      <a href="/smartmoney.html" class="sidebar-nav-link active"><span class="nav-icon">◆</span> Smart Money</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Glossario</div>
+      <div class="text-secondary fs-11" style="line-height:1.7;padding:2px 4px;">
+        <div><strong class="text-accent">Vol. Anomalo</strong> &gt; 1.5x media</div>
+        <div><strong class="text-accent">Smart Money</strong> Institucional</div>
+        <div><strong class="text-accent">Form 4 SEC</strong> Insider EUA</div>
+        <div><strong class="text-accent">Fato Relevante</strong> CVM/B3</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <div class="page-header mb-20">
+      <div class="page-title">Smart Money Tracker</div>
+      <div class="page-subtitle">Movimentos institucionais, volume anomalo e insider trading</div>
+    </div>
+
+    <!-- AI Alert Banner -->
+    <div id="ai-banner" class="ai-banner mb-20">
+      <div class="ai-banner-header">
+        <div class="ai-banner-label">Analise Smart Money — IA</div>
+        <span class="ai-scenario-badge neutro" id="alert-level">MEDIO</span>
+      </div>
+      <div class="loading-state" style="padding:8px 0; justify-content:flex-start; gap:8px;">
+        <div class="loading-spinner"></div>
+        <span class="text-muted">Analisando movimentos com IA...</span>
+      </div>
+    </div>
+
+    <!-- Volume Anomaly Table -->
+    <div class="section-header mb-12">
+      <div>
+        <div class="section-title">Volume Anomalo — 30 dias</div>
+        <div class="section-subtitle">Ativos com volume significativamente acima da media historica</div>
+      </div>
+      <span class="section-badge" id="volume-updated">Atualizando...</span>
+    </div>
+
+    <div style="overflow-x:auto; margin-bottom:24px;">
+      <div id="volume-table-wrap">
+        <div class="loading-state"><div class="loading-spinner"></div> Carregando dados de volume...</div>
+      </div>
+    </div>
+
+    <!-- Whale Alerts -->
+    <div class="section-header mb-12">
+      <div>
+        <div class="section-title">Alertas Whale</div>
+        <div class="section-subtitle">Transacoes de grande porte detectadas</div>
+      </div>
+    </div>
+    <div id="whale-alerts" class="mb-24">
+      <div class="loading-state"><div class="loading-spinner"></div> Analisando padroes...</div>
+    </div>
+
+    <!-- Insider Movements -->
+    <div class="section-header mb-12">
+      <div>
+        <div class="section-title">Insider Tracker</div>
+        <div class="section-subtitle">SEC Form 4 + Fatos Relevantes Brasil (CVM)</div>
+      </div>
+    </div>
+    <div id="insider-list" class="mb-24">
+      <div class="loading-state"><div class="loading-spinner"></div> Carregando movimentos insider...</div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+function startClock() {
+  const timeEl=document.getElementById('clock-time'); const dateEl=document.getElementById('clock-date');
+  const dot=document.getElementById('market-status-dot'); const txt=document.getElementById('market-status-text');
+  if(!timeEl) return;
+  function tick() {
+    const now=new Date();
+    timeEl.textContent=[now.getHours(),now.getMinutes(),now.getSeconds()].map(n=>String(n).padStart(2,'0')).join(':');
+    if(dateEl) dateEl.textContent=now.toLocaleDateString('pt-BR');
+    const brtH=(now.getUTCHours()-3+24)%24; const brtM=brtH*60+now.getUTCMinutes(); const day=now.getUTCDay();
+    const open=day>=1&&day<=5&&brtM>=600&&brtM<1075; const pre=day>=1&&day<=5&&brtM>=570&&brtM<600;
+    if(dot) dot.className='status-dot '+(open?'open':pre?'pre':'closed');
+    if(txt) txt.textContent=open?'B3 ABERTO':pre?'PRE-ABERTURA':'B3 FECHADO';
+  }
+  tick(); setInterval(tick,1000);
+}
+
+async function loadTicker() {
+  try {
+    const res=await fetch('/api/exchanges/ticker-tape'); const items=await res.json();
+    if(!items||!items.length) return;
+    const build=i=>`<span class="ticker-item"><span class="t-symbol">${i.symbol}</span><span class="t-price">${i.price}</span><span class="t-change ${i.change>=0?'pos':'neg'}">${i.change>=0?'▲':'▼'} ${Math.abs(i.change).toFixed(2)}%</span></span>`;
+    const el=document.getElementById('ticker-content');
+    if(el){el.innerHTML=items.map(build).join('')+items.map(build).join(''); el.style.animation=`ticker-scroll ${Math.max(40,items.length*4)}s linear infinite`;}
+  } catch(e){}
+}
+
+async function loadAnaliseIA() {
+  const banner=document.getElementById('ai-banner');
+  const badge =document.getElementById('alert-level');
+  if(!banner) return;
+  try {
+    const res =await fetch('/api/smartmoney/analise-ia');
+    const data=await res.json();
+    const nivelCls = { alto:'pessimista', medio:'neutro', baixo:'otimista' };
+    const cls=nivelCls[data.alerta_nivel]||'neutro';
+    if(badge){badge.textContent=data.alerta_nivel.toUpperCase(); badge.className=`ai-scenario-badge ${cls}`;}
+    banner.innerHTML=`
+      <div class="ai-banner-header">
+        <div class="ai-banner-label">Analise Smart Money — IA</div>
+        <span class="ai-scenario-badge ${cls}">${data.alerta_nivel.toUpperCase()}</span>
+      </div>
+      <div class="ai-points">
+        ${(data.movimentos||[]).map(m=>`<div class="ai-point">${m}</div>`).join('')}
+      </div>
+      ${data.padroes&&data.padroes.length?`<div class="divider"></div><div class="ai-text text-muted fs-12"><strong>Padroes detectados:</strong> ${data.padroes.join(' · ')}</div>`:''}`;
+  } catch(e) {
+    if(banner) banner.innerHTML=`<div class="ai-banner-header"><div class="ai-banner-label">Analise Smart Money</div><span class="ai-scenario-badge neutro">INDISPONIVEL</span></div><div class="ai-text text-muted">Analise indisponivel no momento.</div>`;
+  }
+}
+
+async function loadVolumeAnomalias() {
+  const wrap=document.getElementById('volume-table-wrap');
+  const upd =document.getElementById('volume-updated');
+  if(!wrap) return;
+  try {
+    const res =await fetch('/api/smartmoney/volume-anomalias');
+    const data=await res.json();
+    if(upd) upd.textContent='Atualizado '+new Date().toLocaleTimeString('pt-BR');
+    if(!data||!data.length){wrap.innerHTML='<div class="empty-state">Sem anomalias detectadas.</div>';return;}
+    let html=`<table class="data-table">
+      <thead><tr>
+        <th>TICKER</th>
+        <th class="right">VOLUME ATUAL</th>
+        <th class="right">MEDIA 30D</th>
+        <th class="right">RATIO</th>
+        <th>VARIACAO</th>
+        <th>TIPO</th>
+      </tr></thead><tbody>`;
+    data.forEach(item=>{
+      const ratio=item.razao||item.ratio||0;
+      const ratioCls=ratio>=2?'text-loss':ratio>=1.5?'text-warning':'text-secondary';
+      const varPct=item.variacao_pct||item.variacao||0;
+      const varCls=varPct>=0?'positive':'negative';
+      const varArr=varPct>=0?'▲':'▼';
+      html+=`<tr>
+        <td><div class="ticker-cell"><span class="tk-symbol">${item.ticker}</span></div></td>
+        <td class="right tabular">${(item.volume_atual||0).toLocaleString('pt-BR')}</td>
+        <td class="right tabular text-secondary">${(item.volume_medio||0).toLocaleString('pt-BR')}</td>
+        <td class="right"><span class="${ratioCls} fw-700">${ratio.toFixed(2)}x</span></td>
+        <td><span class="price-change ${varCls}">${varArr} ${Math.abs(varPct).toFixed(2)}%</span></td>
+        <td><span class="badge-tipo ${item.tipo==='Alta Anomala'?'rf':'acoes'}" style="${item.tipo==='Alta Anomala'?'background:rgba(255,61,87,0.12);color:var(--loss);':''}">${item.tipo||'Normal'}</span></td>
+      </tr>`;
+    });
+    html+='</tbody></table>';
+    wrap.innerHTML=html;
+  } catch(e) {
+    wrap.innerHTML='<div class="error-state">Erro ao carregar dados de volume.</div>';
+  }
+}
+
+async function loadWhaleAlerts() {
+  const el=document.getElementById('whale-alerts');
+  if(!el) return;
+  try {
+    const res =await fetch('/api/smartmoney/analise-ia');
+    const data=await res.json();
+    const movs=data.movimentos||[];
+    if(!movs.length){el.innerHTML='<div class="empty-state">Nenhuma atividade whale detectada.</div>';return;}
+    el.innerHTML=movs.map((m,i)=>`
+      <div class="whale-alert">
+        <div class="whale-icon">${i===0?'🐋':i===1?'🦈':'🔔'}</div>
+        <div class="whale-body">
+          <div class="whale-header">
+            <span class="whale-ticker">ALERTA #${i+1}</span>
+            <span class="whale-time">${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</span>
+          </div>
+          <div class="whale-desc">${m}</div>
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    el.innerHTML='<div class="empty-state text-muted">Nenhum alerta whale no momento.</div>';
+  }
+}
+
+async function loadInsiderTracker() {
+  const el=document.getElementById('insider-list');
+  if(!el) return;
+  try {
+    const res =await fetch('/api/smartmoney/insider-tracker');
+    const data=await res.json();
+    if(!data||!data.length){el.innerHTML='<div class="empty-state">Nenhum movimento recente detectado.</div>';return;}
+    el.innerHTML=data.map(item=>{
+      const tipo=(item.tipo||'').toLowerCase();
+      const tipoCls=tipo.includes('compra')?'compra':'venda';
+      const dt=item.data?new Date(item.data).toLocaleDateString('pt-BR'):'—';
+      return `<div class="insider-card">
+        <div class="insider-header">
+          <div class="insider-company">${item.ticker||item.empresa||'—'}</div>
+          <span class="insider-type-badge ${tipoCls}">${item.tipo||'—'}</span>
+        </div>
+        <div class="insider-title">${item.titulo||''}</div>
+        <div class="insider-date">Data: ${dt}</div>
+        ${item.link?`<a href="${item.link}" target="_blank" class="insider-link mt-4 flex">Ver detalhes →</a>`:''}
+      </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML='<div class="empty-state text-muted">Nenhum movimento insider recente.</div>';
+  }
+}
+
+function fazerLogout() {
+  fetch('/api/auth/logout',{method:'POST'}).finally(()=>{ document.cookie='token=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;'; window.location.href='/login.html'; });
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  startClock(); loadTicker(); loadAnaliseIA(); loadVolumeAnomalias(); loadWhaleAlerts(); loadInsiderTracker();
+  setInterval(()=>{ loadTicker(); loadAnaliseIA(); loadVolumeAnomalias(); loadWhaleAlerts(); loadInsiderTracker(); }, 5*60*1000);
+});
+</script>
+<script src="/dashboard/auth-guard.js"></script>
+<script src="/dashboard/chat-widget.js"></script>
+</body>
+</html>
