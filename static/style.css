@@ -1801,7 +1801,8 @@ button { cursor: pointer; font-family: inherit; }
   margin-bottom: 14px;
 }
 
-.form-group label {
+.form-group label,
+.form-label {
   display: block;
   font-size: 11px;
   font-weight: 700;
@@ -1811,7 +1812,8 @@ button { cursor: pointer; font-family: inherit; }
   margin-bottom: 5px;
 }
 
-.form-group input {
+.form-group input,
+.form-input {
   width: 100%;
   padding: 10px 13px;
   background: var(--bg-secondary);
@@ -1822,12 +1824,17 @@ button { cursor: pointer; font-family: inherit; }
   font-family: inherit;
   transition: border-color 0.15s;
   outline: none;
+  box-sizing: border-box;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-input:focus {
   border-color: var(--border-accent);
+  box-shadow: 0 0 0 2px rgba(0,212,255,0.08);
 }
 
+/* Primary action button (login, submit) */
+.btn-primary,
 .btn-login {
   width: 100%;
   padding: 11px;
@@ -1838,8 +1845,22 @@ button { cursor: pointer; font-family: inherit; }
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.03em;
+  cursor: pointer;
   transition: all 0.15s;
   margin-top: 4px;
+}
+
+.btn-primary:hover,
+.btn-login:hover {
+  background: #33ddff;
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled,
+.btn-login:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .btn-login:hover { background: #33deff; }

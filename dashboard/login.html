@@ -1,60 +1,177 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Login - InvestAI</title>
-    <link rel="stylesheet" href="/static/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InvestAI — Acesso</title>
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="login-container">
-        <h1>🚀 InvestAI</h1>
-        <form id="login-form">
-            <input type="text" id="username" placeholder="Usuário" value="hudson" required>
-            <input type="password" id="password" placeholder="Senha" value="hudson2026" required>
-            <button type="submit">Entrar</button>
-        </form>
-        <div id="error" style="color: red; margin-top: 10px;"></div>
+
+<div class="login-page">
+  <div class="login-box">
+
+    <div class="login-brand">
+      <div class="brand-logo" style="width:52px;height:52px;font-size:20px;margin:0 auto 14px;">AI</div>
+      <div class="brand-name" style="font-size:22px;">InvestAI</div>
+      <div class="brand-tag">Finance Platform</div>
     </div>
-    <script>
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = e.target.querySelector('button');
-            const errorDiv = document.getElementById('error');
-            
-            btn.textContent = 'Entrando...';
-            btn.disabled = true;
-            errorDiv.textContent = '';
 
-            try {
-                const res = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    credentials: 'include',
-                    body: JSON.stringify({
-                        username: document.getElementById('username').value,
-                        password: document.getElementById('password').value
-                    })
-                });
+    <form id="login-form" autocomplete="off" novalidate>
 
-                const data = await res.json();
+      <div class="form-group">
+        <label class="form-label" for="username">Usuário</label>
+        <input
+          class="form-input"
+          type="text"
+          id="username"
+          name="username"
+          placeholder="Digite seu usuário"
+          autocomplete="username"
+          required
+          autofocus
+        >
+      </div>
 
-                if (res.ok && data.status === 'success') {
-                    // Login OK - salva no localStorage como fallback
-                    localStorage.setItem('investai_user', data.user);
-                    
-                    // Redireciona imediatamente
-                    window.location.replace('/');
-                } else {
-                    errorDiv.textContent = 'Login inválido: ' + (data.message || 'Erro desconhecido');
-                    btn.textContent = 'Entrar';
-                    btn.disabled = false;
-                }
-            } catch (err) {
-                errorDiv.textContent = 'Erro ao fazer login: ' + err.message;
-                btn.textContent = 'Entrar';
-                btn.disabled = false;
-            }
-        });
-    </script>
+      <div class="form-group" style="margin-top:14px;">
+        <label class="form-label" for="password">Senha</label>
+        <div style="position:relative;">
+          <input
+            class="form-input"
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Digite sua senha"
+            autocomplete="current-password"
+            required
+            style="padding-right:44px;"
+          >
+          <button
+            type="button"
+            id="toggle-pass"
+            tabindex="-1"
+            style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:15px;padding:0;line-height:1;"
+            aria-label="Mostrar/ocultar senha"
+          >👁</button>
+        </div>
+      </div>
+
+      <div id="error-msg" style="display:none; margin-top:12px; padding:10px 12px; background:rgba(255,61,87,0.1); border:1px solid rgba(255,61,87,0.3); border-radius:6px; color:var(--loss); font-size:12.5px;"></div>
+
+      <div id="lockout-msg" style="display:none; margin-top:12px; padding:10px 12px; background:rgba(255,179,0,0.1); border:1px solid rgba(255,179,0,0.3); border-radius:6px; color:var(--warning); font-size:12.5px;"></div>
+
+      <button type="submit" id="submit-btn" class="btn-primary" style="width:100%;margin-top:20px;padding:12px;">
+        Entrar
+      </button>
+
+    </form>
+
+    <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--border); text-align:center; color:var(--text-muted); font-size:11px;">
+      Acesso restrito — plataforma privada
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const form      = document.getElementById('login-form');
+  const btn       = document.getElementById('submit-btn');
+  const errDiv    = document.getElementById('error-msg');
+  const lockDiv   = document.getElementById('lockout-msg');
+  const passInput = document.getElementById('password');
+  const toggleBtn = document.getElementById('toggle-pass');
+
+  // Toggle show/hide password
+  toggleBtn.addEventListener('click', () => {
+    const show = passInput.type === 'password';
+    passInput.type = show ? 'text' : 'password';
+    toggleBtn.textContent = show ? '🙈' : '👁';
+  });
+
+  function showError(msg) {
+    errDiv.textContent = msg;
+    errDiv.style.display = 'block';
+    lockDiv.style.display = 'none';
+  }
+
+  function showLockout(msg) {
+    lockDiv.textContent = msg;
+    lockDiv.style.display = 'block';
+    errDiv.style.display = 'none';
+    btn.disabled = true;
+    btn.textContent = 'Bloqueado';
+  }
+
+  function clearMessages() {
+    errDiv.style.display = 'none';
+    lockDiv.style.display = 'none';
+  }
+
+  function setLoading(loading) {
+    btn.disabled = loading;
+    btn.textContent = loading ? 'Verificando...' : 'Entrar';
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearMessages();
+
+    const username = document.getElementById('username').value.trim();
+    const password = passInput.value;
+
+    if (!username || !password) {
+      showError('Preencha usuário e senha.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.status === 429) {
+        showLockout(data.detail || 'Muitas tentativas. Aguarde e tente novamente.');
+        return;
+      }
+
+      if (res.ok && data.status === 'success') {
+        localStorage.setItem('investai_user', data.user);
+        window.location.replace('/');
+        return;
+      }
+
+      // 401 ou qualquer outro erro
+      showError('Usuário ou senha incorretos.');
+      passInput.value = '';
+      passInput.focus();
+      setLoading(false);
+
+    } catch (err) {
+      showError('Erro de conexão. Verifique sua rede.');
+      setLoading(false);
+    }
+  });
+
+  // Limpa erro ao digitar
+  document.getElementById('username').addEventListener('input', clearMessages);
+  passInput.addEventListener('input', clearMessages);
+
+  // Se já autenticado, vai direto para o dashboard
+  fetch('/api/auth/me', { credentials: 'include' })
+    .then(r => { if (r.ok) window.location.replace('/'); })
+    .catch(() => {});
+})();
+</script>
+
 </body>
 </html>
