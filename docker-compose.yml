@@ -1,37 +1,95 @@
 version: '3.8'
 
+# ── InvestAI — Stack completa ─────────────────────────────────────────────────
+# Serviços: app FastAPI + PostgreSQL + Redis
+# Domínio:  investai.ch8ai.com.br  (nginx externo faz proxy para porta 8091)
+# Secrets:  definidos em .env (nunca commitar o .env real)
+
 services:
+
+  # ── PostgreSQL ────────────────────────────────────────────────────────────────
   postgres:
     image: postgres:16-alpine
     container_name: investai-postgres
-    restart: always
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: investai
-      POSTGRES_PASSWORD: investai123
-      POSTGRES_DB: investai
+      POSTGRES_USER:     ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB:       ${POSTGRES_DB}
     ports:
-      - "5435:5432"
+      - "5435:5432"   # exposto no host para ferramentas externas (DBeaver, etc.)
     volumes:
-      - inscesteai_investai_pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
+      # migrations só são aplicadas na criação inicial do volume
+      # se o volume já existe com dados, estes arquivos são ignorados pelo postgres
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U investai"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - investai-net
 
+  # ── Redis ─────────────────────────────────────────────────────────────────────
   redis:
     image: redis:7-alpine
     container_name: investai-redis
-    restart: always
-    command: redis-server --requirepass investai_redis_2026
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD} --maxmemory 128mb --maxmemory-policy allkeys-lru
     ports:
-      - "6380:6379"
+      - "6380:6379"   # exposto no host para debug
+    volumes:
+      - redisdata:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
       interval: 10s
       timeout: 3s
       retries: 5
+    networks:
+      - investai-net
 
+  # ── InvestAI App ──────────────────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: investai-app:latest
+    container_name: investai-app
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Override para usar os hostnames internos do docker-compose
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      REDIS_HOST:    redis
+      REDIS_PORT:    "6379"
+      APP_HOST:      "0.0.0.0"
+      APP_PORT:      "8091"
+    ports:
+      - "8091:8091"   # nginx externo faz proxy para esta porta
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8091/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 20s
+      retries: 3
+    networks:
+      - investai-net
+
+# ── Redes ─────────────────────────────────────────────────────────────────────
+networks:
+  investai-net:
+    driver: bridge
+
+# ── Volumes ───────────────────────────────────────────────────────────────────
 volumes:
-  inscesteai_investai_pgdata:
+  pgdata:
     external: true
+    name: inscesteai_investai_pgdata   # volume já existente com dados reais
+  redisdata:
+    name: investai_redisdata
