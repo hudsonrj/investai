@@ -1,0 +1,89 @@
+# InvestAI — investeai.ch8ai.com.br
+# Proxy reverso para container Docker na porta 8091
+
+# Redirect HTTP → HTTPS
+server {
+    listen 80;
+    listen [::]:80;
+    server_name investeai.ch8ai.com.br;
+
+    location /.well-known/acme-challenge/ {
+        root /usr/share/nginx/html;
+    }
+
+    location / {
+        return 301 https://$server_name$request_uri;
+    }
+}
+
+# HTTPS
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name investeai.ch8ai.com.br;
+
+    ssl_certificate     /etc/nginx/ssl/investeai-cert.pem;
+    ssl_certificate_key /etc/nginx/ssl/investeai-key.pem;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache   shared:SSL:10m;
+    ssl_session_timeout 10m;
+
+    # Security headers
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Frame-Options           "SAMEORIGIN"  always;
+    add_header X-Content-Type-Options    "nosniff"     always;
+    add_header X-XSS-Protection          "1; mode=block" always;
+    add_header Referrer-Policy           "no-referrer-when-downgrade" always;
+
+    # Cloudflare real IP
+    set_real_ip_from 173.245.48.0/20;
+    set_real_ip_from 103.21.244.0/22;
+    set_real_ip_from 103.22.200.0/22;
+    set_real_ip_from 103.31.4.0/22;
+    set_real_ip_from 141.101.64.0/18;
+    set_real_ip_from 108.162.192.0/18;
+    set_real_ip_from 162.158.0.0/15;
+    set_real_ip_from 172.64.0.0/13;
+    set_real_ip_from 131.0.72.0/22;
+    set_real_ip_from 104.16.0.0/13;
+    set_real_ip_from 104.24.0.0/14;
+    real_ip_header CF-Connecting-IP;
+
+    access_log /var/log/nginx/investeai-access.log;
+    error_log  /var/log/nginx/investeai-error.log;
+
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_comp_level 6;
+    gzip_types text/plain text/css application/json application/javascript text/javascript image/svg+xml;
+
+    # Proxy para container investai-app (porta 8091 no host)
+    location / {
+        proxy_pass         http://172.17.0.1:8091;
+        proxy_http_version 1.1;
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+        proxy_set_header   X-Forwarded-Host  $host;
+        proxy_set_header   Upgrade           $http_upgrade;
+        proxy_set_header   Connection        "upgrade";
+        proxy_connect_timeout 60s;
+        proxy_send_timeout    120s;
+        proxy_read_timeout    120s;
+        proxy_buffer_size     16k;
+        proxy_buffers         8 16k;
+    }
+
+    # Cache de assets estáticos
+    location ~* \.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$ {
+        proxy_pass       http://172.17.0.1:8091;
+        proxy_set_header Host $host;
+        expires          7d;
+        add_header       Cache-Control "public, immutable";
+    }
+}
